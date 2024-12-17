@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "backend-project"
+version = "0.1.0"
+description = "electronic library"
+authors = ["Vlad Verevkin, Kirill Ivantsov, Daniel Kotov"]
+readme = "README.md"
+packages = [{include = "service"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "3.2.16"
+djangorestframework = "3.14.0"
+django-environ = "0.8.0"
+djoser = {version = "2.1.0"}
+celery = {version = "5.2.7", extras= ["redis"]}
+jsonschema = "^4.23.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
