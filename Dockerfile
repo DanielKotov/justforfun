@@ -8,7 +8,7 @@ RUN apt update -y && \
 	apt install -y --no-install-recommends wget xz-utils libfuse2 && \
     mkdir -p /vault/books && \
     mkdir -p /service/db && \
-    touch /service/db/db.sqlite3 
+    touch /service/db/db.sqlite3
 
 
 COPY requirements.txt ./requirements.txt

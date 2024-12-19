@@ -6,7 +6,6 @@ from django.core.management.utils import get_random_secret_key
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 secret_path = os.path.join(BASE_DIR, 'db', "secret.json")
 
 if os.path.exists(secret_path):
@@ -106,9 +105,14 @@ WSGI_APPLICATION = 'service.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, 'db', "db.sqlite3"),
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "default_db_name"),  # Имя базы данных
+        "USER": os.getenv("POSTGRES_USER", "default_user"),   # Пользователь
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "default_password"),  # Пароль
+        "HOST": os.getenv("POSTGRES_HOST", "localhost"),      # Хост
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),           # Порт
     }
+
 }
 
 
@@ -169,6 +173,17 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.MultiPartParser',
         'rest_framework.parsers.FileUploadParser',
     ],
+}
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv('DB_NAME', 'fast_api'),
+        "USER": os.getenv('DB_USER', 'admin'),
+        "PASSWORD": os.getenv('DB_PASSWORD', 'Pizda123$'),
+        "HOST": os.getenv('DB_HOST', 'localhost'),
+        "PORT": os.getenv('DB_PORT', '5433'),
+    }
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

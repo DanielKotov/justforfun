@@ -5,10 +5,6 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from os import system
 
-# Настройки приложения
-app = FastAPI()
-
-# Конфигурация для JWT
 SECRET_KEY = system("openssl -rand hex 32")
 ALGORITHM = "HS256"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -18,10 +14,6 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 def verify_password(passwd: str, hash_passwd: str):
-    return pwd_context.verify(plain_password, hashed_password)
-
-# Вспомогательные функции
-def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_user(db, username: str):
@@ -40,8 +32,7 @@ def create_access_token(data: dict):
     auth_data = get_auth_data()
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-# Эндпоинты FastAPI
-@app.post("/token")
+@app.post("/auth/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -50,7 +41,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token = create_access_token(data={"sub": form_data.username}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.get("/users/me")
+@app.get("/auth/users/me")
 async def read_users_me(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -61,3 +52,8 @@ async def read_users_me(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Invalid token")
     return {"username": username}
 
+async def authenticate_user(email: EmailStr, password: str):
+    user = await UsersDAO.find_one_or_none(email=email)
+    if not user or verify_password(plain_password=password, hashed_password=user.password) is False:
+        return None
+    return user

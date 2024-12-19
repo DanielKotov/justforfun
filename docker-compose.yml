@@ -12,6 +12,7 @@ services:
       sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - redis
+      - postgres
     mem_limit: 1G
     memswap_limit: 1G
     cpu_count: 1
@@ -141,6 +142,22 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
+
+  auth-service:
+    build:
+      context: .
+    command: python service/auth/main.py
+    ports:
+      - "8001:8001"
+    depends_on:
+      - postgres
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=fast_api
+      - DB_USER=admin
+      - DB_PASSWORD=Pizda123$
+      - DATABASE_URL=postgresql+asyncpg://admin:Pizda123$@postgres:5432/fast_api
 volumes:
     vault:
     pgdata:
