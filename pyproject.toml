@@ -15,6 +15,16 @@ djoser = {version = "2.1.0"}
 celery = {version = "5.2.7", extras= ["redis"]}
 jsonschema = "^4.23.0"
 
+alembic = "1.14.0"
+asyncpg = "0.30.0"
+sqlalchemy = "2.0.36"
+pydantic-settings = "2.7.0"
+
+fastapi = "^0.100.0"
+uvicorn = "^0.22.0"
+python-jose = {version = "^3.3.0", extras = ["cryptography"]}
+passlib = {version = "^1.7.4", extras = ["bcrypt"]}
+
 
 [build-system]
 requires = ["poetry-core"]
