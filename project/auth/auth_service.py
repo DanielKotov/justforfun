@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import timezone
 from .utils import verify_password
 
-
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(days=30)
@@ -26,18 +25,12 @@ async def authenticate_user(email: EmailStr, password: str, session: AsyncSessio
     return user
 
 def validate_and_decode_token(token: str) -> dict:
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
 
-        exp = payload.get("exp")
-        if not exp or datetime.utcnow() > datetime.fromtimestamp(exp):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token has expired",
-            )
-        return payload
-    except JWTError:
+    exp = payload.get("exp")
+    if not exp or datetime.utcnow() > datetime.fromtimestamp(exp):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Token has expired",
         )
+    return payload

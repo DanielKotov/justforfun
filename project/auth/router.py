@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password, check_password
 from asgiref.sync import sync_to_async
 from .schemas import SUserRegister, SUserAuth
-from .auth_service import create_access_token
+from .auth_service import create_access_token,validate_and_decode_token
 from fastapi import Request
 
 
@@ -37,10 +37,9 @@ async def auth_user(response: Response, user_data: SUserAuth):
 
     access_token = create_access_token({"sub": str(user.id)})
 
-    response.headers["Authorization"] = f"Bearer {access_token}"
     response.set_cookie(key="users_access_token", value=access_token, httponly=True)
 
-    return {'access_token': access_token}
+    return {'ok': 200}
 
 @router.post("/logout")
 async def logout_user(response: Response):
@@ -50,16 +49,20 @@ async def logout_user(response: Response):
 
 @router.get("/validate-token")
 async def validate_token(request: Request):
-
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
+    token = request.cookies.get("users_access_token")
+    
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authorization header is missing or invalid",
+            detail="Token is missing in cookies",
         )
-    token = auth_header.split(" ")[1]
-
-    payload = validate_and_decode_token(token)
+    try:
+        payload = validate_and_decode_token(token)
+    except Exception as e:
+        logger.info(f"{e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+        )
 
     return {"status": "ok", "user_id": payload.get("sub")}
-
