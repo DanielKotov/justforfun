@@ -34,6 +34,15 @@
               {{ isLocked ? `Locked (${lockoutTimeRemaining})` : 'Войти' }}
             </va-button>
 
+            <va-button
+                v-if="isLoggedIn"
+                class="mt-3 ml-3"
+                @click="onLogout"
+                color="danger"
+            >
+              Выйти
+            </va-button>
+
             <router-link to="/auth/register" class="link-small">Register</router-link>
           </div>
 
@@ -54,8 +63,13 @@ export default {
       password: "",
       error: "",
       remainingAttempts: null,
-      lockoutUntil: null
+      lockoutUntil: null,
+      isLoggedIn: false
     };
+  },
+  mounted() {
+    // Проверяем, есть ли токен при загрузке компонента
+    this.isLoggedIn = !!localStorage.getItem('token');
   },
   computed: {
     isLocked() {
@@ -77,6 +91,7 @@ export default {
 
         const token = await loginGetToken(this.email, this.password);
         localStorage.setItem('token', token);
+        this.isLoggedIn = true;
         this.$emit('login', token);
         this.$router.push('/');
 
@@ -124,5 +139,8 @@ export default {
 va-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+.ml-3 {
+  margin-left: 12px;
 }
 </style>

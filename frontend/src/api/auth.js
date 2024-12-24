@@ -9,16 +9,14 @@ export async function loginGetToken(email, password){
         });
 
         if (response.status === 429) {
-            // Handle too many attempts
             const error = await response.json();
-            throw new Error(error.detail); // "Too many failed attempts. Please try again in 15 minutes"
+            throw new Error(error.detail);
         }
 
         await validateResponse(response);
         const data = await response.json();
         return data.access_token;
     } catch (error) {
-    // Extract remaining attempts from error message if available
         if (error.message.includes('attempts remaining')) {
             const remainingAttempts = error.message.match(/(\d+) attempts remaining/)[1];
             error.remainingAttempts = parseInt(remainingAttempts);
