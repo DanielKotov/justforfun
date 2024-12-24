@@ -18,7 +18,7 @@ async def register_user(user_data: SUserRegister) -> dict:
             status_code=status.HTTP_409_CONFLICT,
             detail='User already exists'
         )
-    
+
     await sync_to_async(User.objects.create)(
         username=user_data.username,
         email=user_data.email,
@@ -34,7 +34,7 @@ async def auth_user(response: Response, user_data: SUserAuth):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Invalid email or password'
         )
-    
+
     access_token = create_access_token({"sub": str(user.id)})
 
     response.headers["Authorization"] = f"Bearer {access_token}"
