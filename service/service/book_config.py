@@ -1,3 +1,0 @@
-BOOK_STORE = '/vault/books'
-MAX_BOOKS_COUNT = 10
-MAX_BOOKS_SIZE = 128 * 1024
