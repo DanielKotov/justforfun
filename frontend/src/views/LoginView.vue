@@ -4,11 +4,18 @@
       <va-card-title>Sign In</va-card-title>
       <va-card-content>
         <va-form style="width: 250px;">
-          <p class="error" v-if="error">{{error}}</p>
+          <p class="error" v-if="error">{{ error }}</p>
+          
+          <!-- Show remaining attempts warning -->
+          <p class="warning" v-if="remainingAttempts !== null">
+            Warning: {{ remainingAttempts }} login attempts remaining
+          </p>
+
+          <!-- Changed from login to email -->
           <va-input
-              v-model="login"
-              label="Login"
-              :rules="[(value) => (value && value.length > 0) || 'Введите имя пользователя']"
+              v-model="email"
+              label="Email"
+              :rules="[(value) => (value && value.length > 0) || 'Введите почту']"
           />
           <va-input
               v-model="password"
@@ -22,11 +29,12 @@
                 type="submit"
                 class="mt-3"
                 @click="onSubmit"
+                :disabled="isLocked"
             >
-              Войти
+              {{ isLocked ? `Locked (${lockoutTimeRemaining})` : 'Войти' }}
             </va-button>
 
-            <router-link to="/register" class="link-small">Регистрация</router-link>
+            <router-link to="/register" class="link-small">Register</router-link>
           </div>
 
         </va-form>
@@ -36,29 +44,57 @@
 </template>
 
 <script>
-import {loginGetToken} from "@/api/auth";
+import { loginGetToken } from "@/api/auth";
 
 export default {
   name: "LoginView",
   data() {
     return {
-      login: "",
+      email: "",  // Changed from login to email
       password: "",
       error: "",
+      remainingAttempts: null,
+      lockoutUntil: null
     };
   },
+  computed: {
+    isLocked() {
+      return this.lockoutUntil && new Date() < new Date(this.lockoutUntil);
+    },
+    lockoutTimeRemaining() {
+      if (!this.lockoutUntil) return '';
+      const minutes = Math.ceil((new Date(this.lockoutUntil) - new Date()) / (1000 * 60));
+      return `${minutes} min`;
+    }
+  },
   methods: {
-    onSubmit(){
-      loginGetToken(this.login, this.password)
-          .then((token) => {
-            localStorage.setItem('token', token)
-            this.$emit('login', token)
-            this.$router.push('/')
-          })
-          .catch((error) => {
-            console.log(error)
-            this.error = error
-          })
+    async onSubmit() {
+      if (this.isLocked) return;
+
+      try {
+        this.error = "";
+        this.remainingAttempts = null;
+        
+        const token = await loginGetToken(this.email, this.password);
+        localStorage.setItem('token', token);
+        this.$emit('login', token);
+        this.$router.push('/');
+        
+      } catch (error) {
+        console.log(error);
+        this.error = error.message;
+
+        if (error.message.includes('Too many failed attempts')) {
+          // Set lockout timer for 15 minutes
+          this.lockoutUntil = new Date(Date.now() + 15 * 60 * 1000);
+        } else if (error.message.includes('attempts remaining')) {
+          // Extract remaining attempts from error message
+          const match = error.message.match(/(\d+) attempts remaining/);
+          if (match) {
+            this.remainingAttempts = parseInt(match[1]);
+          }
+        }
+      }
     }
   }
 }
@@ -67,6 +103,11 @@ export default {
 <style scoped>
 .error {
   color: red;
+  margin-bottom: 10px;
+}
+.warning {
+  color: orange;
+  margin-bottom: 10px;
 }
 .container {
   display: flex;
@@ -79,5 +120,9 @@ export default {
 .link-small {
   font-size: 12px;
   margin-top: 10px;
+}
+va-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

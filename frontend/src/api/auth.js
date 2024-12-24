@@ -1,14 +1,30 @@
-export async function loginGetToken(login, password){
-    const response = await fetch('/auth/token/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({username: login, password})
-    });
-    await validateResponse(response)
-    const data = await response.json();
-    return data.auth_token;
+export async function loginGetToken(email, password){
+    try {
+        const response = await fetch('api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({email, password})
+        });
+
+        if (response.status === 429) {
+            // Handle too many attempts
+            const error = await response.json();
+            throw new Error(error.detail); // "Too many failed attempts. Please try again in 15 minutes"
+        }
+
+        await validateResponse(response);
+        const data = await response.json();
+        return data.access_token;
+    } catch (error) {
+    // Extract remaining attempts from error message if available
+        if (error.message.includes('attempts remaining')) {
+            const remainingAttempts = error.message.match(/(\d+) attempts remaining/)[1];
+            error.remainingAttempts = parseInt(remainingAttempts);
+        }
+        throw error;
+    }
 }
 
 export async function validateResponse(response) {
@@ -43,24 +59,25 @@ export async function validateResponse(response) {
 }
 
 export async function registerUser(login, password, email){
-    const response = await fetch('/auth/users/', {
+    const response = await fetch('api/auth/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({username: login, password, email})
+        body: JSON.stringify({
+             username,
+             email,
+             password,
+             confirm_password: password
+        })
     });
     await validateResponse(response);
     return await response.json();
 }
 
 export async function logout(token){
-    const response = await fetch('/auth/token/logout', {
+    const response = await fetch('api/auth/logout', {
         method: 'POST',
-        headers: {
-            'Authorization' : `Token ${token}`
-        },
-        body: token
     });
     await validateResponse(response);
 }
