@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from asgiref.sync import sync_to_async
 from .schemas import SUserRegister, SUserAuth
 from .auth_service import create_access_token
+from fastapi import Request
 
 
 router = APIRouter(prefix='/auth', tags=['Auth'])
