@@ -10,11 +10,12 @@ RUN npm run build
 
 # production environment
 FROM nginx:1.16.0-alpine
+RUN mkdir -p /etc/nginx/ssl/
 COPY --from=build /frontend/dist /usr/share/nginx/html
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/nginx.conf.template
 COPY nginx-entrypoint.sh /
 RUN ["chmod", "+x", "/nginx-entrypoint.sh"]
 ENTRYPOINT ["/nginx-entrypoint.sh"]
-EXPOSE 80
+EXPOSE 443
 CMD ["nginx", "-g", "daemon off;"]

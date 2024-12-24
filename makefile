@@ -16,7 +16,7 @@ up: ## Поднимает сервисы в фоне
 	$(DOCKER_COMPOSE) up -d
 
 down: ## Останавливает все сервисы
-	$(DOCKER_COMPOSE) down
+	$(DOCKER_COMPOSE) down -v
 
 build_up: ## Собирает и запускает сервисы сразу
 	$(DOCKER_COMPOSE) up --build -d
@@ -26,28 +26,6 @@ restart: ## Перезапускает сервисы
 
 logs: ## Показывает логи контейнеров
 	$(DOCKER_COMPOSE) logs -f
-
-# Установка зависимостей через Poetry
-install: ## Устанавливает зависимости через Poetry
-	$(DOCKER_COMPOSE) run web-app $(POETRY) install
-
-# Django-команды
-migrate: ## Выполняет миграции базы данных
-	$(DOCKER_COMPOSE) exec web-app $(POETRY) run python manage.py migrate
-
-shell: ## Запускает интерактивную оболочку Django
-	$(DOCKER_COMPOSE) exec web-app $(POETRY) run python manage.py shell
-
-# Celery-команды
-worker: ## Запускает Celery worker
-	$(DOCKER_COMPOSE) up -d worker
-
-cleaner: ## Запускает Celery beat
-	$(DOCKER_COMPOSE) up -d worker-cleaner
-
-# Nginx
-nginx: ## Запускает Nginx-сервис
-	$(DOCKER_COMPOSE) up -d nginx
 
 # Тестирование
 test: ## Запускает тесты через Poetry
