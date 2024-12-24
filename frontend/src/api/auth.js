@@ -65,17 +65,17 @@ export async function registerUser(login, password, email){
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-             username,
-             email,
-             password,
-             confirm_password: password
+            username: login,
+            email,
+            password,
+            confirm_password: password
         })
     });
     await validateResponse(response);
     return await response.json();
 }
 
-export async function logout(token){
+export async function logout(){
     const response = await fetch('/auth/logout', {
         method: 'POST',
     });

@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { loginGetToken } from "@/auth";
+import { loginGetToken } from "@/api/auth";
 
 export default {
   name: "LoginView",

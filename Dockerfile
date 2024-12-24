@@ -15,5 +15,5 @@ COPY requirements.txt ./requirements.txt
 
 RUN pip install -r requirements.txt
 
-COPY project/service /service
+COPY ./project /service
 
