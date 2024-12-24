@@ -5,7 +5,7 @@
       <va-card-content>
         <va-form style="width: 250px;">
           <p class="error" v-if="error">{{ error }}</p>
-          
+
           <!-- Show remaining attempts warning -->
           <p class="warning" v-if="remainingAttempts !== null">
             Warning: {{ remainingAttempts }} login attempts remaining
@@ -34,7 +34,7 @@
               {{ isLocked ? `Locked (${lockoutTimeRemaining})` : 'Войти' }}
             </va-button>
 
-            <router-link to="/register" class="link-small">Register</router-link>
+            <router-link to="/auth/register" class="link-small">Register</router-link>
           </div>
 
         </va-form>
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { loginGetToken } from "@/api/auth";
+import { loginGetToken } from "@/auth";
 
 export default {
   name: "LoginView",
@@ -74,12 +74,12 @@ export default {
       try {
         this.error = "";
         this.remainingAttempts = null;
-        
+
         const token = await loginGetToken(this.email, this.password);
         localStorage.setItem('token', token);
         this.$emit('login', token);
         this.$router.push('/');
-        
+
       } catch (error) {
         console.log(error);
         this.error = error.message;

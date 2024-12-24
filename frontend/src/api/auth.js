@@ -1,6 +1,6 @@
 export async function loginGetToken(email, password){
     try {
-        const response = await fetch('api/auth/login', {
+        const response = await fetch('/auth/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -59,7 +59,7 @@ export async function validateResponse(response) {
 }
 
 export async function registerUser(login, password, email){
-    const response = await fetch('api/auth/register', {
+    const response = await fetch('/auth/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -76,7 +76,7 @@ export async function registerUser(login, password, email){
 }
 
 export async function logout(token){
-    const response = await fetch('api/auth/logout', {
+    const response = await fetch('/auth/logout', {
         method: 'POST',
     });
     await validateResponse(response);
