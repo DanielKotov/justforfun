@@ -5,6 +5,10 @@ from asgiref.sync import sync_to_async
 from .schemas import SUserRegister, SUserAuth
 from .auth_service import create_access_token,validate_and_decode_token
 from fastapi import Request
+from fastapi.encoders import jsonable_encoder
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix='/auth', tags=['Auth'])
@@ -50,19 +54,44 @@ async def logout_user(response: Response):
 @router.get("/validate-token")
 async def validate_token(request: Request):
     token = request.cookies.get("users_access_token")
-    
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token is missing in cookies",
         )
     try:
+    
         payload = validate_and_decode_token(token)
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token payload",
+            )
+        
+    
+        user = await sync_to_async(User.objects.get)(id=user_id)
+
+    
+        return {
+            "status": "ok",
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "is_active": user.is_active,
+                "is_superuser": user.is_superuser,
+                "is_staff": user.is_staff,
+            }
+        }
+    except User.DoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
     except Exception as e:
-        logger.info(f"{e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
         )
 
-    return {"status": "ok", "user_id": payload.get("sub")}
