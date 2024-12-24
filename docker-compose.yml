@@ -1,4 +1,25 @@
-services:
+services: 
+  auth-service:
+    build:
+      context: fastapi.Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: >
+      sh -c "uvicorn service.asgi:application --host 0.0.0.0 --port 8000 --reload"
+    depends_on:
+      - redis
+      - postgres
+      - web-app
+    mem_limit: 1G
+    memswap_limit: 1G
+    cpu_count: 1
+    pids_limit: 128
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 32768
+ 
   web-app:
     build:
       context: .
@@ -143,21 +164,6 @@ services:
     tty: true
     stdin_open: true
 
-  auth-service:
-    build:
-      context: .
-    command: python service/auth/main.py
-    ports:
-      - "8001:8001"
-    depends_on:
-      - postgres
-    environment:
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=fast_api
-      - DB_USER=admin
-      - DB_PASSWORD=Pizda123$
-      - DATABASE_URL=postgresql+asyncpg://admin:Pizda123$@postgres:5432/fast_api
 volumes:
     vault:
     pgdata:
