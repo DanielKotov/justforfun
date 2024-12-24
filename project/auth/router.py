@@ -10,7 +10,7 @@ from fastapi import Request
 router = APIRouter(prefix='/auth', tags=['Auth'])
 
 
-@router.post("/register/")
+@router.post("/register")
 async def register_user(user_data: SUserRegister) -> dict:
     user_exists = await sync_to_async(User.objects.filter(email=user_data.email).exists)()
     if user_exists:
@@ -26,7 +26,7 @@ async def register_user(user_data: SUserRegister) -> dict:
     )
     return {'message': 'Successfully registered!'}
 
-@router.post("/login/")
+@router.post("/login")
 async def auth_user(response: Response, user_data: SUserAuth):
     user = await sync_to_async(User.objects.filter(email=user_data.email).first)()
     if not user or not check_password(user_data.password, user.password):
@@ -42,13 +42,13 @@ async def auth_user(response: Response, user_data: SUserAuth):
 
     return {'access_token': access_token}
 
-@router.post("/logout/")
+@router.post("/logout")
 async def logout_user(response: Response):
     response.delete_cookie(key="users_access_token")
     return {'message': 'User successfully logged out'}
 
 
-@router.get("/validate-token/")
+@router.get("/validate-token")
 async def validate_token(request: Request):
 
     auth_header = request.headers.get("Authorization")
